@@ -1,0 +1,102 @@
+<html>
+  <head>
+    <title>My first Three.js app</title>
+    <style>canvas { width: 100%; height: 100% }</style>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+  </head>
+  <body>
+    <script src="three.min.js"></script>
+    <script src='threex.keyboardstate.js'></script>
+    <script>
+
+      //globals
+      var container, scene, camera, renderer, controls, stats;
+      var keyboard = new THREEx.KeyboardState();
+      var clock = new THREE.Clock();
+      var background;
+      // custom global variables
+
+      function loadSkybox() {
+        //skybox setup
+        var imagePrefix = "textures/skybox/";
+        var skyMaterial;
+
+        var skyGeometry = new THREE.PlaneGeometry(50, 50, 1, 1);
+        var textureFront = new THREE.ImageUtils.loadTexture('textures/skybox/posx.jpg');
+
+        var skyMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, map: textureFront});
+        return new THREE.Mesh(skyGeometry, skyMaterial);
+      }
+
+      function init() {
+        //set to render the scene in the browser window
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+        document.body.appendChild( renderer.domElement );
+
+        scene = new THREE.Scene();
+        //camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 100000 );
+        var width = window.innerWidth;
+        var height = window.innerHeight;
+        camera = new THREE.OrthographicCamera( -10, 10, 10, -10, 1, 100000 );
+
+        //set lighting 
+        var dirLight = new THREE.DirectionalLight( 0xffffff, 0.9 );
+        dirLight.position.set(1,1,0.75);
+        scene.add(dirLight);
+
+        //build enviroment
+        var geometry = new THREE.CubeGeometry(1,1,1);
+        var material = new THREE.MeshLambertMaterial( { color: 0x0000ff } );
+        var cube = new THREE.Mesh(geometry, material);
+        scene.add( cube );
+        //add plane
+
+        //var plane = new THREE.Mesh( new THREE.PlaneGeometry(100.1, 100.1), new THREE.MeshLambertMaterial( { color: 0xff0000} ));
+        //plane.position.y -= 1;
+        //scene.add( plane ); 
+
+        //skyBox.material = THREE.BackSide;
+        background = loadSkybox();
+        scene.add(background);
+        
+        //set initial comera position
+        camera.position.z = 2;
+        camera.position.y = 1;
+        camera.position.x = 1;
+      }
+
+      function updateCameraLocation() {
+        if (keyboard.pressed("w")) {
+          camera.position.y += 0.1;    //about x, up
+        } else if (keyboard.pressed("s")) {
+          camera.position.y -= 0.1;    //about x, down
+        } else if (keyboard.pressed("a")) {
+          camera.position.x -= 0.1;    //about y, left 
+        } else if (keyboard.pressed("d")) {
+          camera.position.x += 0.1;
+        }
+      }
+
+      function updateBackgroundLocation() {
+        background.position.y = camera.position.y/2;
+        background.position.x = camera.position.x/2;
+      }
+
+      function render() {
+        requestAnimationFrame(render);
+        updateCameraLocation();
+        updateBackgroundLocation();
+        //camera.rotation.x += 0.01;
+        //camera.rotation.y += 0.01;
+        //camera.lookAt(scene.position);
+        
+        renderer.render(scene, camera);
+      }
+
+      init();
+      render();     
+    </script>
+  </body>
+</html>
